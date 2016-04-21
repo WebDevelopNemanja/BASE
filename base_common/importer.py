@@ -84,6 +84,9 @@ def import_from_settings(imported_modules, app_to_start):
     if hasattr(pm, 'TESTS'):
         base_config.settings.APP_TESTS = pm.TESTS
 
+    if hasattr(pm, 'MASTER') and pm.MASTER:
+        base_config.settings.MASTER = pm.MASTER
+
     if hasattr(pm, 'PREFIX'):
         base_config.settings.APP_TESTS = pm.TESTS
 

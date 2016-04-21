@@ -167,13 +167,16 @@ def authenticated_call(*arguments):
             tk = request_handler.auth_token
             _db = get_db()
 
-            from base_common.dbatokens import authorized_by_token
-            if not authorized_by_token(_db, tk):
-                log.critical("Unauthorized access attempt")
-                return base_common.msg.error(amsgs.UNAUTHORIZED_REQUEST)
+            if base_config.settings.AUTH_USER:
+                dbuser = base_config.settings.AUTH_USER
+            else:
+                from base_common.dbatokens import authorized_by_token
+                if not authorized_by_token(_db, tk):
+                    log.critical("Unauthorized access attempt")
+                    return base_common.msg.error(amsgs.UNAUTHORIZED_REQUEST)
 
-            from base_common.dbatokens import get_user_by_token
-            dbuser = get_user_by_token(_db, tk)
+                from base_common.dbatokens import get_user_by_token
+                dbuser = get_user_by_token(_db, tk)
 
             _access = (len(arguments) == 0)
             for a in arguments:

@@ -8,6 +8,7 @@ from tornado import gen
 from tornado import httpclient
 
 import base_common.msg
+import base_config.settings
 import base_config.settings as csettings
 import base_lookup.api_messages as amsgs
 from base_lookup.http_methods import GET, POST, PUT, DELETE, PATCH
@@ -240,6 +241,10 @@ class GeneralPostHandler(tornado.web.RequestHandler):
             if len(tka) == 1:
                 tk = tka[0].strip()
 
+        if base_config.settings.MASTER == self.request.remote_ip and 'Base-User' in self.request.headers:
+            _auth_user = self.request.headers.get('Base-User')
+            base_config.settings.AUTH_USER = _auth_user
+
         self.auth_token = tk
         self.r_ip = ip
 
@@ -253,6 +258,16 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         _body = self.request.body if method not in [GET,] else None
 
         _headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+        if self.auth_token:
+
+            import base_common.dbacommon
+            import base_common.dbatokens
+            _db = base_common.dbacommon.get_db()
+            _logged_user = base_common.dbatokens.get_user_by_token(_db, self.auth_token)
+
+            _headers['Base-User'] = json.dumps(_logged_user.dump_user())
+
         if self.auth_token:
             _headers['Authorization'] = self.auth_token
 
