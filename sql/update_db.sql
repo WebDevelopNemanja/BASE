@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS auth_users (
 	id char(10) PRIMARY KEY,
 	username varchar(128) NOT NULL UNIQUE,
 	password char(255) NOT NULL,
@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
 	active BOOLEAN NOT NULL DEFAULT FALSE,
 	role_flags int NOT NULL,
 	INDEX (username),
-	INDEX (active)
+	INDEX (active),
+	INDEX (role_flags)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE hash_2_params (
@@ -61,7 +62,7 @@ CREATE TABLE session_token (
   closed boolean DEFAULT FALSE,
 	INDEX (id_user),
 	INDEX (closed),
-	CONSTRAINT session_token_fk0 FOREIGN KEY (id_user) REFERENCES users(id)
+	CONSTRAINT session_token_fk0 FOREIGN KEY (id_user) REFERENCES auth_users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE mail_queue (
@@ -78,7 +79,7 @@ CREATE TABLE mail_queue (
 
 insert into sequencers (id, s_partition, active_stage, size, check_sum_size, name ,type, s_table, ordered)
 values
-('u','00','000',4,0,'users','STR','s_users',false),
+('a','00','000',4,0,'auth_users','STR','s_auth_users',false),
 ('s','00','000',58,0,'session_token','STR','s_session_token',false),
 ('h','00','000',58,0,'hash_2_params','STR','s_hash_2_params ',false)
 -- ('c','00','000',3,0,'clubs','STR','s_clubs',false),
@@ -86,8 +87,8 @@ values
 -- ('u','00','000',3,0,'um_transactions','STR','s_um_transactions',false)
 ;
 
-drop table if exists s_users;
-CREATE TABLE s_users (
+drop table if exists s_auth_users;
+CREATE TABLE s_auth_users (
     id char(10) PRIMARY KEY,
     active_stage char(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

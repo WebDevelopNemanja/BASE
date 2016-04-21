@@ -197,9 +197,9 @@ def authenticated_call(*arguments):
 def check_user_exists(username, db, userid=None):
     dbc = db.cursor()
     if userid:
-        q = "select id from users where id = '{}'".format(userid)
+        q = "select id from auth_users where id = '{}'".format(userid)
     else:
-        q = "select id from users where username = '{}'".format(username)
+        q = "select id from auth_users where username = '{}'".format(username)
 
     try:
         dbc.execute(q)

@@ -67,7 +67,7 @@ def do_get(*args, **kwargs):
         log.critical('Missing hash parameter: {}'.format(e))
         return base_common.msg.error(msgs.TOKEN_MISSING_ARGUMENT)
 
-    q = '''select username from users where id = '{}' '''.format(id_user)
+    q = '''select username from auth_users where id = '{}' '''.format(id_user)
 
     try:
         dbc.execute(q)

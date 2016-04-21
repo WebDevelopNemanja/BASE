@@ -30,7 +30,7 @@ def prepare_user_query(u_id, username, password, *args, **kwargs):
 
     # role_flags - HARDCODED to 1
 
-    q = "INSERT into users (id, username, password, role_flags, active) VALUES " \
+    q = "INSERT into auth_users (id, username, password, role_flags, active) VALUES " \
         "('{}', '{}', '{}', 1, true)".format(
                 u_id,
                 username,
@@ -49,7 +49,7 @@ def pack_user_by_id(db, id_user, get_dict=False):
     """
 
     dbc = db.cursor()
-    q = "select id, username, password, role_flags, active from users where id = '{}'".format(id_user)
+    q = "select id, username, password, role_flags, active from auth_users where id = '{}'".format(id_user)
 
     import MySQLdb
     try:
@@ -59,7 +59,7 @@ def pack_user_by_id(db, id_user, get_dict=False):
         return False
 
     if dbc.rowcount != 1:
-        log.critical('Fount {} users with id {}'.format(dbc.rowcount, id_user))
+        log.critical('Fount {} auth_users with id {}'.format(dbc.rowcount, id_user))
         return False
 
     #DUMMY CLASS INSTANCE USER JUST FOR EASIER MANIPULATION OF DATA
@@ -87,7 +87,7 @@ def pack_user_by_id(db, id_user, get_dict=False):
 
 def prepare_login_query(username):
 
-    q = "select id, password from users where username = '{}'".format( username )
+    q = "select id, password from auth_users where username = '{}'".format( username )
 
     return q
 

@@ -22,7 +22,7 @@ request_timeout = 10
 
 def _check_user_registered(dbc, uname):
 
-    q = "select id from users where username = '{}'".format(uname)
+    q = "select id from auth_users where username = '{}'".format(uname)
     dbc.execute(q)
     return dbc.rowcount != 0
 
