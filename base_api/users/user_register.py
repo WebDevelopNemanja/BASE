@@ -50,7 +50,7 @@ def do_post(username, password, users_data, **kwargs):
     if hasattr(apphooks, 'check_password_is_valid') and not apphooks.check_password_is_valid(password):
         return base_common.msg.error(msgs.INVALID_PASSWORD)
 
-    u_id = sequencer().new('u')
+    u_id = sequencer().new('a')
 
     if not u_id:
         return base_common.msg.error(msgs.ERROR_SERIALIZE_USER)

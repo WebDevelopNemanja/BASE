@@ -97,7 +97,7 @@ def __get_user_by_token_from_sql(dbc, tk, is_active):
     q = '''SELECT
               s.id id, s.id_user id_user, s.created created, s.closed closed
             FROM
-              session_token s JOIN users u ON s.id_user = u.id
+              session_token s JOIN auth_users u ON s.id_user = u.id
             WHERE
               s.id = '{}' {} AND NOT s.closed'''.format(
         tk,

@@ -84,7 +84,7 @@ def do_post(**kwargs):
     # UPDATE USERS PASSWORD
     password = format_password(username, newpassword)
 
-    uq = "update users set password = '{}' where username = '{}'".format(
+    uq = "update auth_users set password = '{}' where username = '{}'".format(
         password,
         username
     )

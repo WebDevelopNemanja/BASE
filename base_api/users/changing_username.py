@@ -83,7 +83,7 @@ def do_get(*args, **kwargs):
 
     passwd = format_password(newusername, password);
 
-    q1 = '''update users set username = '{}', password = '{}' where id = '{}' '''.format(newusername, passwd, id_user)
+    q1 = '''update auth_users set username = '{}', password = '{}' where id = '{}' '''.format(newusername, passwd, id_user)
 
     try:
         dbc.execute(q1)
