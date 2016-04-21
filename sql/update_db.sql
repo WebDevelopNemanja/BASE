@@ -73,6 +73,7 @@ CREATE TABLE mail_queue (
 	time_sent DATETIME,
 	sent BOOLEAN NOT NULL DEFAULT FALSE,
 	message TEXT NOT NULL,
+	data TEXT,
 	INDEX email_sender_idx (sender),
 	INDEX email_sent (sent)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -82,9 +83,6 @@ values
 ('a','00','000',4,0,'auth_users','STR','s_auth_users',false),
 ('s','00','000',58,0,'session_token','STR','s_session_token',false),
 ('h','00','000',58,0,'hash_2_params','STR','s_hash_2_params ',false)
--- ('c','00','000',3,0,'clubs','STR','s_clubs',false),
--- ('e','00','000',3,0,'events','STR','s_events',false),
--- ('u','00','000',3,0,'um_transactions','STR','s_um_transactions',false)
 ;
 
 drop table if exists s_auth_users;
