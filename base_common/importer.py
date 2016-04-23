@@ -149,8 +149,23 @@ def import_from_settings(imported_modules, app_to_start):
         base_app = importlib.import_module(bapp)
         for _m in base_app.IMPORTS:
 
-            mm_ = importlib.import_module(_m)   # import base modules
+            _balance_excluded = False
+            _synced_call = False
+            _m_real = _m
+            if type(_m) == tuple:
+                _m_real = _m[0]
+                _balance_excluded = _m[1] if len(_m) > 1 else False
+                _synced_call = _m[2] if len(_m) > 2 else False
+
+            mm_ = importlib.import_module(_m_real)  # import base modules
             mm_.BASE = True
+
+            if _synced_call:
+                mm_.SYNCED = True
+
+            if _balance_excluded:
+                mm_.BALANCE_EXCLUDED = True
+
 
             for f in [o for o in getmembers(mm_) if isfunction(o[1])]:
                 _add_to_imports(mm_, f[1], imported_modules)

@@ -121,22 +121,10 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         self.api_module_name = None
         self.allowed = None
         self.denied = None
+        self.balance_excluded = False
         self.r_ip = None
         self._a_p = None
         super().__init__(application, request, **kwargs)
-
-        if csettings.LB:
-            setattr(GeneralPostHandler, 'get', self.a_get)
-            setattr(GeneralPostHandler, 'put', self.a_put)
-            setattr(GeneralPostHandler, 'post', self.a_post)
-            setattr(GeneralPostHandler, 'patch', self.a_patch)
-            setattr(GeneralPostHandler, 'delete', self.a_delete)
-        else:
-            setattr(GeneralPostHandler, 'get', self._get)
-            setattr(GeneralPostHandler, 'put', self._put)
-            setattr(GeneralPostHandler, 'post', self._post)
-            setattr(GeneralPostHandler, 'patch', self._patch)
-            setattr(GeneralPostHandler, 'delete', self._delete)
 
         self.e_msgs = {
             GET: amsgs.NOT_IMPLEMENTED_GET,
@@ -150,14 +138,29 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         print('RECEIVED CHUNK', chunk)
         print('RECEIVED CHUNK', type(chunk))
 
-    def initialize(self, apimodule_map, allowed=None, denied=None):
+    def initialize(self, apimodule_map, allowed=None, denied=None, balance_excluded=False):
 
         self.apimodule_map = apimodule_map
         self.apimodule = self.apimodule_map['module']
         self.api_module_name = self.apimodule.name
         self.allowed = allowed
         self.denied = denied
+        self.balance_excluded = balance_excluded
         log.info(self.api_module_name)
+
+        if csettings.LB and (not self.balance_excluded):
+            setattr(GeneralPostHandler, 'get', self.a_get)
+            setattr(GeneralPostHandler, 'put', self.a_put)
+            setattr(GeneralPostHandler, 'post', self.a_post)
+            setattr(GeneralPostHandler, 'patch', self.a_patch)
+            setattr(GeneralPostHandler, 'delete', self.a_delete)
+        else:
+            setattr(GeneralPostHandler, 'get', self._get)
+            setattr(GeneralPostHandler, 'put', self._put)
+            setattr(GeneralPostHandler, 'post', self._post)
+            setattr(GeneralPostHandler, 'patch', self._patch)
+            setattr(GeneralPostHandler, 'delete', self._delete)
+
 
     def write_error(self, status_code, **kwargs):
         if not csettings.DEBUG:
@@ -243,7 +246,8 @@ class GeneralPostHandler(tornado.web.RequestHandler):
 
         if base_config.settings.MASTER == self.request.remote_ip and 'Base-User' in self.request.headers:
             _auth_user = self.request.headers.get('Base-User')
-            base_config.settings.AUTH_USER = _auth_user
+            if tk:
+                base_config.settings.AUTH_USER[tk] = _auth_user
 
         self.auth_token = tk
         self.r_ip = ip
@@ -271,10 +275,22 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         if self.auth_token:
             _headers['Authorization'] = self.auth_token
 
-        _res = yield _aclient.fetch(_uri, body=_body, method=http_rev_map[method], headers=_headers)
+        try:
+            _res = yield _aclient.fetch(_uri, body=_body, method=http_rev_map[method], headers=_headers)
+            _res = _res.body.decode('utf-8')
+        except tornado.httpclient.HTTPError as e:
+            log.critical('Request to slave server {} error: {}'.format(self._a_p, e))
+            _res = amsgs.msgs[amsgs.ERROR_SLAVE_REQUEST]
+            self.set_status(404)
+        except ConnectionRefusedError as e:
+            log.critical('Cannot connect to server {}: {}'.format(self._a_p, e))
+            _res = amsgs.msgs[amsgs.ERROR_CONNECT_TO_SLAVE_SERVER]
+            self.set_status(404)
 
         # log.info('EXITING SERVER: {}'.format(self._a_p))
-        self.write(_res.body.decode('utf-8'))
+        self.auth_token = None
+
+        self.write(_res)
         self.finish()
 
     def set_api_header(self, return_type):
@@ -315,7 +331,7 @@ class GeneralPostHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(base_common.msg.error(self.e_msgs[method])))
                     return
 
-                if csettings.LB:
+                if csettings.LB and not self.balance_excluded:
 
                     global _c
                     _server = csettings.BALANCE[ _c % len(csettings.BALANCE) ]

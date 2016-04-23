@@ -42,6 +42,8 @@ ERROR_SET_OPTION = 48
 ERROR_GET_OPTION = 49
 OPTION_NOT_EXIST = 50
 ERROR_UPDATE_MESSAGE = 51
+ERROR_CONNECT_TO_SLAVE_SERVER = 52
+ERROR_SLAVE_REQUEST = 53
 
 msgs = {}
 msgs[EXCEPTION] = "Exception"
@@ -88,3 +90,5 @@ msgs[ERROR_SET_OPTION] = "Error setting option"
 msgs[ERROR_GET_OPTION] = "Error getting option"
 msgs[OPTION_NOT_EXIST] = "Option does not exists"
 msgs[ERROR_UPDATE_MESSAGE] = "Error update mail queue"
+msgs[ERROR_CONNECT_TO_SLAVE_SERVER] = "Server Error"
+msgs[ERROR_SLAVE_REQUEST] = "Server Request Error"

@@ -168,7 +168,10 @@ def authenticated_call(*arguments):
             _db = get_db()
 
             if base_config.settings.AUTH_USER:
-                dbuser = base_config.settings.AUTH_USER
+                if not tk in base_config.settings.AUTH_USER:
+                    log.critical("Unauthorized access attempt to slave")
+                    return base_common.msg.error(amsgs.UNAUTHORIZED_REQUEST)
+                dbuser = base_config.settings.AUTH_USER[tk]
             else:
                 from base_common.dbatokens import authorized_by_token
                 if not authorized_by_token(_db, tk):

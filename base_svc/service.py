@@ -57,10 +57,14 @@ def entry_point(api_path, api_module_map, allowed=None, denied=None):
     log.info("Registering {}".format(api_module.name))
 
     base_pkg = hasattr(api_module, 'BASE') and api_module.BASE
+    balance_excluded = hasattr(api_module, 'BALANCE_EXCLUDED') and api_module.BALANCE_EXCLUDED
 
     _uri = "^/{}{}".format("" if base_pkg else "{}/".format(api_module.PREFIX), api_path)
 
-    return _uri, base_svc.comm.GeneralPostHandler, dict(allowed=allowed, denied=denied, apimodule_map=api_module_map)
+    return _uri, base_svc.comm.GeneralPostHandler, dict(allowed=allowed,
+                                                        denied=denied,
+                                                        apimodule_map=api_module_map,
+                                                        balance_excluded=balance_excluded)
 
 
 def start_tests(app_started, t_stage, t_keep):
