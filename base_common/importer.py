@@ -208,6 +208,9 @@ def get_pkgs(pkg_map):
 
             base_pkg = importlib.import_module(bapp)
             for _m in base_pkg.IMPORTS:
+                if type(_m) == tuple:
+                    _m = _m[0]
+
                 _pk = importlib.import_module(_m)
 
                 _pk.__api_methods__ = []

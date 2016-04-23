@@ -184,7 +184,8 @@ def finish_tests(server_pid, success=True):
         print(st)
 
     os.kill(server_pid, signal.SIGTERM)
-    sys.exit()
+    _exit_code = 0 if success else 1
+    sys.exit(_exit_code)
 
 
 def load_app_test(app_started, app_tests_list, stage):

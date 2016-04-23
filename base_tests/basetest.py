@@ -67,7 +67,8 @@ def test_base(svc_port, t_stage):
 
     except Exception as e:
         log_failed('Error in test: {}'.format(e), '', None)
-        sys.exit(1)
+        finish_tests(base_config.settings.S_PID, success=False)
+        # sys.exit(1)
 
 
 def _prepare_stage_dump(_test_db, db_user, db_passwd, stage):
