@@ -9,13 +9,13 @@ import tornado.web
 import base_common.msg
 from base_config.service import log
 from base_lookup import api_messages as msgs
-from base_common.dbacommon import format_password
+from base_common.app_hooks import format_password
+from base_common.app_hooks import check_password
 from base_common.dbacommon import get_db
 from base_common.dbacommon import app_api_method
 from base_common.dbatokens import authorized_by_token
 from base_common.dbatokens import get_user_by_token
 from base_common.dbacommon import get_url_token
-from base_common.dbacommon import check_password
 from base_svc.comm import BaseAPIRequestHandler
 import base_api.hash2params.retrieve_hash
 

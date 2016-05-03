@@ -65,6 +65,18 @@ def test_base(svc_port, t_stage):
         # SHOW API SPECIFICATION TEST
         base_tests.test_list.show_api_spec_test(svc_port)
 
+        # SAVE CURRENCY TEST
+        base_tests.test_list.save_currency_test(svc_port)
+
+        # GET CURRENCY TEST
+        base_tests.test_list.get_currency_test(svc_port)
+
+        # SAVE TRANSACTION TEST
+        base_tests.test_list.add_transaction_test(svc_port)
+
+        # RESET TRANSACTION TEST
+        base_tests.test_list.reset_transaction_test(svc_port)
+
     except Exception as e:
         log_failed('Error in test: {}'.format(e), '', None)
         finish_tests(base_config.settings.S_PID, success=False)

@@ -82,8 +82,10 @@ insert into sequencers (id, s_partition, active_stage, size, check_sum_size, nam
 values
 ('a','00','000',4,0,'auth_users','STR','s_auth_users',false),
 ('s','00','000',58,0,'session_token','STR','s_session_token',false),
-('h','00','000',58,0,'hash_2_params','STR','s_hash_2_params ',false)
-;
+('h','00','000',58,0,'hash_2_params','STR','s_hash_2_params ',false),
+('t','00','000',10,0,'transactions','STR','s_transactions',false),
+('v','00','000',4,0,'account_summary','STR','s_account_summary',false),
+('w','00','000',4,0,'daily_summary','STR','s_daily_summary',false);
 
 drop table if exists s_auth_users;
 CREATE TABLE s_auth_users (
@@ -102,3 +104,81 @@ CREATE TABLE s_hash_2_params (
 	id char(64) PRIMARY KEY,
 	active_stage char(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+drop table if exists s_transactions;
+CREATE TABLE s_transactions(
+    id char(16) PRIMARY KEY,
+    active_stage char(3)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+drop table if exists s_account_summary;
+CREATE TABLE s_account_summary(
+	id char(10) PRIMARY KEY,
+	active_stage char(3)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+drop table if exists s_daily_summary;
+CREATE TABLE s_daily_summary(
+	id char(10) PRIMARY KEY,
+	active_stage char(3)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- TRANSACTIONS --
+CREATE TABLE IF NOT EXISTS currency(
+	id INTEGER PRIMARY KEY AUTO_INCREMENT,
+	currency char(3) NOT NULL,
+	last_modified DATETIME NOT NULL DEFAULT NOW(),
+	value DECIMAL(10,2) NOT NULL,
+	INDEX (currency)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO currency (currency, value) VALUES ('EUR', 1.00);
+
+CREATE TABLE IF NOT EXISTS transactions(
+	id char(16) PRIMARY KEY,
+	id_user char(10) NOT NULL,
+	transaction_time DATETIME(4) NOT NULL,
+	transaction_type int NOT NULL,
+	value DECIMAL(10,2) NOT NULL,
+	referent_value DECIMAL(10,2) NOT NULL,
+	id_currency_change INTEGER NOT NULL,
+	data text,
+	INDEX (id_user),
+	INDEX (transaction_type ),
+	CONSTRAINT transactions_fk0 FOREIGN KEY (id_user) REFERENCES auth_users(id),
+	CONSTRAINT transactions_fk1 FOREIGN KEY (id_currency_change ) REFERENCES currency(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS account_summary(
+	id char(10) PRIMARY KEY,
+	id_user char(10) NOT NULL,
+	balance DECIMAL(10,2) NOT NULL,
+	payin_sum DECIMAL(10,2) NOT NULL,
+	id_currency_change INTEGER NOT NULL,
+	reset_time DATETIME(4),
+	id_reset_user char(10),
+	INDEX (id_user),
+	INDEX (id_reset_user),
+	INDEX (reset_time),
+	CONSTRAINT account_summary_fk0 FOREIGN KEY (id_user) REFERENCES auth_users(id),
+	CONSTRAINT account_summary_fk1 FOREIGN KEY (id_reset_user) REFERENCES auth_users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS daily_summary(
+	id char(10) PRIMARY KEY,
+	id_user char(10) NOT NULL,
+	date DATE NOT NULL,
+	summary DECIMAL(10,2) NOT NULL,
+	id_currency_change INTEGER NOT NULL,
+	reset_time DATETIME(4),
+	id_reset_user char(10),
+	INDEX (id_user),
+	INDEX (id_reset_user),
+	INDEX (reset_time),
+	INDEX (date),
+	CONSTRAINT daily_summary_fk0 FOREIGN KEY (id_user) REFERENCES auth_users(id),
+	CONSTRAINT daily_summary_fk1 FOREIGN KEY (id_reset_user) REFERENCES auth_users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+

@@ -8,7 +8,7 @@ import base_common.msg
 import base_api.hash2params.save_hash
 from base_config.service import log
 from base_lookup import api_messages as msgs
-from base_common.dbacommon import format_password
+from base_common.app_hooks import format_password
 from base_common.dbacommon import get_db
 from base_common.dbacommon import app_api_method
 from base_svc.comm import BaseAPIRequestHandler

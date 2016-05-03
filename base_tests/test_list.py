@@ -7,9 +7,11 @@ sys.path.append(pth)
 
 import base_common.dbatokens
 import base_lookup.api_messages as amsgs
+import base_lookup.transaction_types as tt
 from base_tests.tests_common import WarningLevel, test
 from base_tests.tests_common import log
 from base_tests.tests_common import log_info
+from base_tests.tests_common import make_base_url
 
 
 def base_user_register_test(svc_port):
@@ -207,7 +209,7 @@ def base_user_changing_username_test(svc_port):
          {'username': 'user1@test.loc', 'password': '123'}, 200,
          {'message': amsgs.msgs[amsgs.CHANGE_USERNAME_REQUEST]}, result_types={'message': str})
 
-    htk1 = base_tests.tests_common.parse_hash_from_change_username_mail(_db,'user1@test.loc')
+    htk1 = base_tests.tests_common.parse_hash_from_change_username_mail(_db, 'user1@test.loc')
 
     loc1 = base_api.users.changing_username.location[:-2] + htk1
     test(svc_port, loc1, 'GET', None, {}, 200, {'message': amsgs.msgs[amsgs.USER_NAME_CHANGED]},
@@ -333,9 +335,170 @@ def base_del_option_test(svc_port):
 def show_api_spec_test(svc_port):
     log_info("Show API Specification test", '', None)
 
-    test(svc_port, 'spec', 'GET', None, {}, 200, {'api_version':'', 'status': '', 'applications': ''},
+    test(svc_port, 'spec', 'GET', None, {}, 200, {'api_version': '', 'status': '', 'applications': ''},
          result_types={'api_version': str, 'status': int, 'applications': dict},
          warning_level=WarningLevel.STRICT_ON_KEY)
     test(svc_port, 'spec', 'DELETE', None, {}, 405, {})
     test(svc_port, 'spec?html=true', 'GET', None, {}, 200, {'message': '', 'status': 200},
          result_types={'message': str, 'status': int}, warning_level=WarningLevel.STRICT_ON_KEY)
+
+
+def save_currency_test(svc_port):
+    log_info("Save Currency test", '', None)
+
+    import base_api.users.user_login
+    import base_api.transactions.currency
+
+    tku = test(svc_port, make_base_url(base_api.users.user_login.location), 'POST', None,
+               {'username': 'user1@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+               warning_level=WarningLevel.STRICT_ON_KEY)['token']
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'POST', None, {}, 404,
+         {'message': amsgs.msgs[amsgs.NOT_IMPLEMENTED_POST]})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', None, {}, 400,
+         {'message': amsgs.msgs[amsgs.UNAUTHORIZED_REQUEST]})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tku, {}, 400,
+         {'message': amsgs.msgs[amsgs.MISSING_REQUEST_ARGUMENT]})
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tku,
+         {'currency': 'RSD', 'value': 120.00}, 204, {})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tku,
+         {'currency': 'RSD', 'value': 122.20}, 204, {})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tku,
+         {'currency': 'RSD', 'value': 121.50}, 204, {})
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tku,
+         {'currency': 'EUR', 'value': 1.00}, 204, {})
+
+
+def get_currency_test(svc_port):
+    log_info("Get Currency test", '', None)
+
+    import base_api.users.user_login
+    import base_api.transactions.currency
+
+    tku = test(svc_port, base_api.users.user_login.location, 'POST', None,
+               {'username': 'user1@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+               warning_level=WarningLevel.STRICT_ON_KEY)['token']
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'POST', None, {}, 404,
+         {'message': amsgs.msgs[amsgs.NOT_IMPLEMENTED_POST]})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', None, {}, 400,
+         {'message': amsgs.msgs[amsgs.UNAUTHORIZED_REQUEST]})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', tku, {}, 400,
+         {'message': amsgs.msgs[amsgs.MISSING_REQUEST_ARGUMENT]})
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', tku, {'currency': 'RSD'}, 200, {})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', tku, {'currency': 'RSD'}, 200,
+         {'RSD': 121.50}, result_types={'RSD': float})
+
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', tku, {'currency': 'EUR'}, 200, {})
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'GET', tku, {'currency': 'EUR'}, 200,
+         {'EUR': 1.00}, result_types={'EUR': float})
+
+
+def add_transaction_test(svc_port):
+    log_info("Add Transaction test", '', None)
+
+    import base_api.transactions.transaction
+    import base_api.users.user_login
+
+    tk = test(svc_port, base_api.users.user_login.location, 'POST', None,
+              {'username': 'user2@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+              warning_level=WarningLevel.STRICT_ON_KEY)['token']
+
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__),
+         'POST', None, {}, 404, {'message': amsgs.msgs[amsgs.NOT_IMPLEMENTED_POST]})
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__),
+         'PUT', None, {}, 400, {'message': amsgs.msgs[amsgs.UNAUTHORIZED_REQUEST]})
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk, {}, 400,
+         {'message': amsgs.msgs[amsgs.MISSING_REQUEST_ARGUMENT]})
+
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYIN, 'value': 5.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.WEB_PAYIN, 'value': 4.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYOUT, 'value': 2.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.WEB_PAYOUT, 'value': 3.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYIN, 'value': -1.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.WEB_PAYIN, 'value': -1.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYOUT, 'value': -1.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.WEB_PAYOUT, 'value': -1.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYIN, 'value': 6.0, 'currency': 'RSD',
+          'data': json.dumps({'ref': 'xxxx'})}, 200, {'transaction_id': ''}, result_types={'transaction_id': str},
+         warning_level=WarningLevel.STRICT_ON_KEY)
+
+    # tka = test(svc_port, base_api.users.user_login.location, 'POST', None,
+    #            {'username': 'admin1@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+    #            warning_level=WarningLevel.STRICT_ON_KEY)['token']
+
+    import base_api.transactions.currency
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tk,
+         {'currency': 'RSD', 'value': 123.50}, 204, {})
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYIN, 'value': 5.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+    test(svc_port, make_base_url(base_api.transactions.currency.location), 'PUT', tk,
+         {'currency': 'RSD', 'value': 122.70}, 204, {})
+    test(svc_port, make_base_url(base_api.transactions.transaction.location,
+                                 base_api.transactions.transaction.transaction_add.__api_path__), 'PUT', tk,
+         {'transaction_type': tt.PAYIN, 'value': 5.011, 'currency': 'RSD'}, 200,
+         {'transaction_id': ''}, result_types={'transaction_id': str}, warning_level=WarningLevel.STRICT_ON_KEY)
+
+
+def reset_transaction_test(svc_port):
+    log_info("Reset Transaction test", '', None)
+
+    import base_api.users.user_login
+    import base_api.transactions.transaction_reset
+
+    tku = test(svc_port, base_api.users.user_login.location, 'POST', None,
+               {'username': 'user2@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+               warning_level=WarningLevel.STRICT_ON_KEY)['token']
+    tku1 = test(svc_port, base_api.users.user_login.location, 'POST', None,
+                {'username': 'user3@test.loc', 'password': '123'}, 200, {'token': ''}, result_types={'token': str},
+                warning_level=WarningLevel.STRICT_ON_KEY)['token']
+
+    _db = base_common.dbacommon.get_db('test_')
+    dbuser1 = base_common.dbatokens.get_user_by_token(_db, tku1, is_active=False)
+
+    test(svc_port, make_base_url(base_api.transactions.transaction_reset.location), 'POST', None, {}, 404,
+         {'message': amsgs.msgs[amsgs.NOT_IMPLEMENTED_POST]})
+    test(svc_port, make_base_url(base_api.transactions.transaction_reset.location), 'PATCH', None, {}, 400,
+         {'message': amsgs.msgs[amsgs.UNAUTHORIZED_REQUEST]})
+    test(svc_port, make_base_url(base_api.transactions.transaction_reset.location), 'PATCH', tku, {}, 400,
+         {'message': amsgs.msgs[amsgs.MISSING_REQUEST_ARGUMENT]})
+
+    test(svc_port, make_base_url(base_api.transactions.transaction_reset.location), 'PATCH', tku,
+         {'id_user': dbuser1.id_user}, 204, {})
+

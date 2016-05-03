@@ -5,7 +5,6 @@ import json
 import json.decoder
 import redis
 import decimal
-import bcrypt
 import datetime
 import MySQLdb
 import MySQLdb.cursors
@@ -15,6 +14,7 @@ from MySQLdb import IntegrityError
 import base_config.settings
 import base_common.msg
 import base_lookup.http_methods as _hm
+import base_common.app_hooks as apphooks
 from base_common.dbaexc import ApplicationDbConfig
 from base_lookup import api_messages as amsgs
 from base_config.service import log
@@ -85,18 +85,6 @@ def close_stdout(debug):
 
 def qu_esc(query):
     return MySQLdb.escape_string(query).decode('utf-8')
-
-
-def format_password(username, password):
-
-    return bcrypt.hashpw('{}{}'.format(username, password).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-
-def check_password(db_pwd, username, password):
-
-    pwd = '{}{}'.format(username, password).encode('utf-8')
-    dpwd = db_pwd.encode('utf-8')
-    return dpwd == bcrypt.hashpw(pwd, dpwd)
 
 
 def app_api_method(**arguments):
@@ -186,6 +174,16 @@ def authenticated_call(*arguments):
 
                 if bool(dbuser.role&a):
                     _access = True
+
+            defined_arguments = False
+            if hasattr(apphooks, 'authenticated_callback'):
+                defined_arguments = apphooks.authenticated_callback(original_f.__name__, original_f.__module__)
+
+            if type(defined_arguments) is list and len(defined_arguments) != 0:
+                _access = False
+                for a in defined_arguments:
+                    if bool(dbuser.role&a):
+                        _access = True
 
             if not _access:
                 log.critical("Unauthorized user access attempt")

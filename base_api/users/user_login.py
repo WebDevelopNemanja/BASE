@@ -8,7 +8,7 @@ from base_common.dbatokens import get_token
 from base_common.dbacommon import get_db
 from base_common.dbacommon import params
 from base_common.dbacommon import app_api_method
-from base_common.dbacommon import check_password
+from base_common.app_hooks import check_password
 from base_lookup import api_messages as msgs
 from base_config.service import log
 

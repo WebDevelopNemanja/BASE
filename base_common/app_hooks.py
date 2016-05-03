@@ -1,6 +1,9 @@
 """
 Application specific hooks will be added to this module, or
 existing will be overloaded if needed
+
+format_password -- format password for new user (parameters: username, password)
+check_password -- check password is right (parameters: password from db, username, password)
 check_password_is_valid -- validate given password (parameters: password) (user_register)
 post_register_digest -- post register users data processing
                         (parameters: users id, username, password, json users data) (user_register)
@@ -9,10 +12,23 @@ prepare_user_query -- prepare query for insert user in db
 pack_user_by_id -- get user from db by it's id (db connection, user id) (dbtokens)
 prepare_login_query -- prepare query for user login (parameters: username)
 post_login_digest -- post login processing (parameters: id_user, username, password(plain), login token)
+authenticated_callback -- return list of authenticated roles for given function name from given function module
 """
 
-from base_common.dbacommon import format_password
+import bcrypt
 from base_config.service import log
+
+
+def format_password(username, password):
+
+    return bcrypt.hashpw('{}{}'.format(username, password).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+def check_password(db_pwd, username, password):
+
+    pwd = '{}{}'.format(username, password).encode('utf-8')
+    dpwd = db_pwd.encode('utf-8')
+    return dpwd == bcrypt.hashpw(pwd, dpwd)
 
 
 def prepare_user_query(u_id, username, password, *args, **kwargs):
