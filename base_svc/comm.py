@@ -146,9 +146,10 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         self.allowed = allowed
         self.denied = denied
         self.balance_excluded = balance_excluded
+        self.balanced_call = csettings.LB and (not self.balance_excluded)
         log.info(self.api_module_name)
 
-        if csettings.LB and (not self.balance_excluded):
+        if self.balanced_call:
             setattr(GeneralPostHandler, 'get', self.a_get)
             setattr(GeneralPostHandler, 'put', self.a_put)
             setattr(GeneralPostHandler, 'post', self.a_post)
@@ -160,7 +161,6 @@ class GeneralPostHandler(tornado.web.RequestHandler):
             setattr(GeneralPostHandler, 'post', self._post)
             setattr(GeneralPostHandler, 'patch', self._patch)
             setattr(GeneralPostHandler, 'delete', self._delete)
-
 
     def write_error(self, status_code, **kwargs):
         if not csettings.DEBUG:
@@ -331,8 +331,10 @@ class GeneralPostHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(base_common.msg.error(self.e_msgs[method])))
                     return
 
-                if csettings.LB and not self.balance_excluded:
+                # if csettings.LB and not self.balance_excluded:
+                if self.balanced_call:
 
+                    # TODO: napraviti logiku trazenja servera (hook)
                     global _c
                     _server = csettings.BALANCE[ _c % len(csettings.BALANCE) ]
                     _c += 1

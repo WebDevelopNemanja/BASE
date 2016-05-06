@@ -14,21 +14,19 @@ if len(sys.argv) != 4:
     sys.exit(1)
 
 data = {
-    'username': 'user92',
-    'password': '123'
+    'name': sys.argv[2],
+    'ip': sys.argv[3]
 }
 
-from base_svc.comm import BaseAPIRequestHandler
-
-rh = BaseAPIRequestHandler()
-rh.set_argument('name', sys.argv[3])
-rh.set_argument('ip', sys.argv[4])
-kwargs = {}
-kwargs['request_handler'] = rh
-
+from base_svc.comm import call
 import base_api.balancer.balance_server
-res = base_api.balancer.balance_server.save_server(sys.argv[3], sys.argv[4], **kwargs)
-# if 'http_status' not in res or res['http_status'] != 200:
-print(res)
-
-
+res, status = call('localhost', sys.argv[1], base_api.balancer.balance_server.location, data, 'PUT')
+print(res, status)
+#
+# try:
+#     res = json.loads(res) if res else {}
+# except Exception as e:
+#     log_warning('Error load json data: {}'.format(res), '', None)
+#     log_warning('Error: {}'.format(e), '', None)
+#     result.update({'message': res})
+#     res = {'message': res}

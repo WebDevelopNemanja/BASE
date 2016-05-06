@@ -452,3 +452,28 @@ def get_current_datetime():
         return _td_datetime
     else:
         return datetime.datetime.now()
+
+
+def get_balanced_servers():
+
+    q = '''SELECT id, name, ip, created FROM balanced_servers WHERE active'''
+    _db = get_db()
+    dbc = _db.cursor()
+    try:
+        dbc.execute(q)
+    except IntegrityError as e:
+        log.critical('Error fetch balanced servers from db: {}'.format(e))
+        return False
+
+    if dbc.rowcount < 1:
+        log.critical('No balanced servers found')
+        return False
+
+    servers = {}
+    for sr in dbc.fetchall():
+        servers[sr['id']] = {
+            'name': sr['name'],
+            'created': sr['created']
+        }
+
+    return servers

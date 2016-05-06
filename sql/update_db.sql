@@ -5,9 +5,11 @@ CREATE TABLE IF NOT EXISTS auth_users (
 	password_expire DATETIME,
 	active BOOLEAN NOT NULL DEFAULT FALSE,
 	role_flags int NOT NULL,
+	id_server int,
 	INDEX (username),
 	INDEX (active),
-	INDEX (role_flags)
+	INDEX (role_flags),
+	CONSTRAINT auth_users_fk0 FOREIGN KEY (id_server) REFERENCES balanced_servers(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE hash_2_params (
@@ -41,8 +43,7 @@ CREATE TABLE IF NOT EXISTS sequencers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS options;
-CREATE TABLE options(
+CREATE TABLE IF NOT EXISTS options(
 	id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
   o_key VARCHAR(32) NOT NULL,
   o_value VARCHAR(128) NOT NULL,
@@ -179,6 +180,19 @@ CREATE TABLE IF NOT EXISTS daily_summary(
 	CONSTRAINT daily_summary_fk0 FOREIGN KEY (id_user) REFERENCES auth_users(id),
 	CONSTRAINT daily_summary_fk1 FOREIGN KEY (id_reset_user) REFERENCES auth_users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS balanced_servers (
+	id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) UNIQUE NOT NULL,
+  ip VARCHAR(128) UNIQUE NOT NULL,
+	created DATETIME NOT NULL,
+	deactivated DATETIME,
+	active BOOLEAN NOT NULL,
+  INDEX (name),
+	INDEX (ip),
+	INDEX (active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 
 

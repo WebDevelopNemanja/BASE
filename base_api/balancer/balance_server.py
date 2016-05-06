@@ -23,9 +23,9 @@ def _get_save_server_query(s_name, s_ip):
     n = datetime.datetime.now()
     return '''INSERT INTO
                 balanced_servers
-                (id, name, ip, created, active)
+                (name, ip, created, active)
               VALUES
-                (null, '{}', '{}', '{}', true)'''.format(s_name, s_ip, str(n))
+                ('{}', '{}', '{}', true)'''.format(s_name, s_ip, str(n))
 
 
 @app_api_method(
@@ -51,6 +51,8 @@ def save_server(name_server, ip_server, **kwargs):
     except MySQLdb.IntegrityError as e:
         log.critical('Error saving server {} with address {}, error: {}'.format(name_server, ip_server, e))
         return base_common.msg.error(msgs.ERROR_ADD_SERVER)
+
+    _db.commit()
 
     return base_common.msg.put_ok()
 

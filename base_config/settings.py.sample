@@ -9,6 +9,7 @@ BASE_APPS = [
      'base_api.hash2params',
      'base_api.options',
      'base_api.mail_api',
+     'base_api.balancer',
      'base_api.transactions',
 ]
 

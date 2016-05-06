@@ -75,11 +75,15 @@ def import_from_settings(imported_modules, app_to_start):
     if hasattr(pm, 'LB'):
         base_config.settings.LB = pm.LB
         if base_config.settings.LB:
-            if hasattr(pm, 'BALANCE'):
-                base_config.settings.BALANCE = pm.BALANCE
-            else:
+
+            from base_common.dbacommon import get_balanced_servers
+            _balanced = get_balanced_servers()
+
+            if not _balanced:
                 from base_common.dbaexc import BalancingAppException
                 raise BalancingAppException("Missing balancing server ips")
+
+            setattr(base_config.settings, 'BALANCE', _balanced)
 
     if hasattr(pm, 'TESTS'):
         base_config.settings.APP_TESTS = pm.TESTS
@@ -165,7 +169,6 @@ def import_from_settings(imported_modules, app_to_start):
 
             if _balance_excluded:
                 mm_.BALANCE_EXCLUDED = True
-
 
             for f in [o for o in getmembers(mm_) if isfunction(o[1])]:
                 _add_to_imports(mm_, f[1], imported_modules)

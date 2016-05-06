@@ -52,6 +52,8 @@ ERROR_ADDING_CURRENCY = 58
 ERROR_GET_CURRENCY = 59
 ERROR_POST_CHECK = 60
 ERROR_PACK_LOOKUPS = 61
+ERROR_ADD_SERVER = 62
+ERROR_GET_SERVER = 63
 
 msgs = {}
 msgs[EXCEPTION] = "Exception"
@@ -108,3 +110,5 @@ msgs[ERROR_ADDING_CURRENCY] = "Error save currency"
 msgs[ERROR_GET_CURRENCY] = "Error get currency"
 msgs[ERROR_POST_CHECK] = "Check post error"
 msgs[ERROR_PACK_LOOKUPS] = "Error pack lookups"
+msgs[ERROR_ADD_SERVER] = "Error save server"
+msgs[ERROR_GET_SERVER] = "Error get server"
