@@ -298,6 +298,18 @@ class GeneralPostHandler(tornado.web.RequestHandler):
         if return_type == 'html':
             self.set_header('Content-Type', 'text/html')
 
+    def check_api_slave_call(self):
+
+        if not hasattr(base_config.settings, 'MASTER') or not base_config.settings.MASTER:
+            log.critical('Missing MASTER address')
+            return False
+
+        if base_config.settings.MASTER != self.r_ip:
+            log.critical('Wrong MASTER address {} expected {}'.format(self.r_ip, base_config.settings.MASTER))
+            return False
+
+        return True
+
     def call_api_fun(self, method):
 
         self.set_header('Access-Control-Allow-Origin', '*')
@@ -319,8 +331,13 @@ class GeneralPostHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(base_common.msg.error(amsgs.NOT_API_CALL)))
                     return
 
-                # k = fun.__name__
-                # p = fun.__parent__
+                if hasattr(fun, '__api_slave_call__') and fun.__api_slave_call__:
+                    if not self.check_api_slave_call():
+                        self.set_status(500)
+                        self.write(json.dumps(base_common.msg.error(amsgs.WRONG_API_CALL)))
+                        return
+
+
                 _fun_method = getattr(fun, '__api_method_type__')
                 _fun_method = http_map[_fun_method]
                 if method != _fun_method:

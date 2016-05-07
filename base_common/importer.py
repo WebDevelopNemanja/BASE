@@ -111,7 +111,7 @@ def import_from_settings(imported_modules, app_to_start):
     if hasattr(pm, 'CHANGE_EMAIL_ADDRESS'):
         base_config.settings.CHANGE_EMAIL_ADDRESS = pm.CHANGE_EMAIL_ADDRESS
 
-    def _add_to_imports(_mm, _f, _m):
+    def _add_to_imports(_mm, _f, _m, _base = False):
 
         # _expose = False
         try:
@@ -127,6 +127,8 @@ def import_from_settings(imported_modules, app_to_start):
                 raise ApiMethodError('{} http method is not implemented'.format(_f.__api_method_type__))
 
             _m_path = '{}/{}'.format(_mm.location, _f_path) if _f_path else _mm.location
+            if not _base:
+                _m_path = '{}/{}'.format(base_config.settings.APP_PREFIX, _m_path)
 
             if _m_path not in _m:
                 _m[_m_path] = {}
@@ -171,7 +173,7 @@ def import_from_settings(imported_modules, app_to_start):
                 mm_.BALANCE_EXCLUDED = True
 
             for f in [o for o in getmembers(mm_) if isfunction(o[1])]:
-                _add_to_imports(mm_, f[1], imported_modules)
+                _add_to_imports(mm_, f[1], imported_modules, True)
 
 
 def get_pkgs(pkg_map):

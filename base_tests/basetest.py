@@ -23,59 +23,59 @@ def test_base(svc_port, t_stage):
         # USER REGISTER TEST
         base_tests.test_list.base_user_register_test(svc_port)
 
-        # LOGIN TESTS
-        base_tests.test_list.base_user_login_test(svc_port)
-
-        # LOGOUT TESTS
-        base_tests.test_list.base_user_logout_test(svc_port)
-
-        # FORGOT PASSWORD TESTS
-        base_tests.test_list.base_user_forgot_password_test(svc_port)
-
-        # HASHI SAVE TESTS
-        base_tests.test_list.base_hash_save_test(svc_port)
-
-        # HASH RETRIEVE TESTS
-        base_tests.test_list.base_hash_retrieve_test(svc_port)
-
-        # CHANGE PASSWORD TESTS
-        base_tests.test_list.base_user_change_password_test(svc_port)
-
-        # CHECK USER TESTS
-        base_tests.test_list.base_user_check_test(svc_port)
-
-        # CHANGE USERNAME TEST
-        base_tests.test_list.base_user_change_username_test(svc_port)
-
-        # CHANGING USERNAME TEST
-        base_tests.test_list.base_user_changing_username_test(svc_port)
-
-        # SAVE MAIL TEST
-        base_tests.test_list.base_save_message_test(svc_port)
-
-        # SET OPTIONS TEST
-        base_tests.test_list.base_set_option_test(svc_port)
-
-        # GET OPTIONS TEST
-        base_tests.test_list.base_get_option_test(svc_port)
-
-        # DELETE OPTIONS TEST
-        base_tests.test_list.base_del_option_test(svc_port)
-
-        # SHOW API SPECIFICATION TEST
-        base_tests.test_list.show_api_spec_test(svc_port)
-
-        # SAVE CURRENCY TEST
-        base_tests.test_list.save_currency_test(svc_port)
-
-        # GET CURRENCY TEST
-        base_tests.test_list.get_currency_test(svc_port)
-
-        # SAVE TRANSACTION TEST
-        base_tests.test_list.add_transaction_test(svc_port)
-
-        # RESET TRANSACTION TEST
-        base_tests.test_list.reset_transaction_test(svc_port)
+        # # LOGIN TESTS
+        # base_tests.test_list.base_user_login_test(svc_port)
+        #
+        # # LOGOUT TESTS
+        # base_tests.test_list.base_user_logout_test(svc_port)
+        #
+        # # FORGOT PASSWORD TESTS
+        # base_tests.test_list.base_user_forgot_password_test(svc_port)
+        #
+        # # HASHI SAVE TESTS
+        # base_tests.test_list.base_hash_save_test(svc_port)
+        #
+        # # HASH RETRIEVE TESTS
+        # base_tests.test_list.base_hash_retrieve_test(svc_port)
+        #
+        # # CHANGE PASSWORD TESTS
+        # base_tests.test_list.base_user_change_password_test(svc_port)
+        #
+        # # CHECK USER TESTS
+        # base_tests.test_list.base_user_check_test(svc_port)
+        #
+        # # CHANGE USERNAME TEST
+        # base_tests.test_list.base_user_change_username_test(svc_port)
+        #
+        # # CHANGING USERNAME TEST
+        # base_tests.test_list.base_user_changing_username_test(svc_port)
+        #
+        # # SAVE MAIL TEST
+        # base_tests.test_list.base_save_message_test(svc_port)
+        #
+        # # SET OPTIONS TEST
+        # base_tests.test_list.base_set_option_test(svc_port)
+        #
+        # # GET OPTIONS TEST
+        # base_tests.test_list.base_get_option_test(svc_port)
+        #
+        # # DELETE OPTIONS TEST
+        # base_tests.test_list.base_del_option_test(svc_port)
+        #
+        # # SHOW API SPECIFICATION TEST
+        # base_tests.test_list.show_api_spec_test(svc_port)
+        #
+        # # SAVE CURRENCY TEST
+        # base_tests.test_list.save_currency_test(svc_port)
+        #
+        # # GET CURRENCY TEST
+        # base_tests.test_list.get_currency_test(svc_port)
+        #
+        # # SAVE TRANSACTION TEST
+        # base_tests.test_list.add_transaction_test(svc_port)
+        #
+        # # RESET TRANSACTION TEST
+        # base_tests.test_list.reset_transaction_test(svc_port)
 
     except Exception as e:
         log_failed('Error in test: {}'.format(e), '', None)
@@ -155,7 +155,7 @@ def prepare_test_db(_test_db, user, passwd, t_stage, t_keep):
 
     db_app = 'mysql'
     dump_app = 'mysqldump'
-    required_tables = 'sequencers'
+    required_tables = 'sequencers currency'
     required_tables = add_keep_tables(required_tables, t_keep)
 
     dump_cmd = '{} -u{} -p{} -d {} > {}'.format(

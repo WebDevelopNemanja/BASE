@@ -14,7 +14,6 @@ from MySQLdb import IntegrityError
 import base_config.settings
 import base_common.msg
 import base_lookup.http_methods as _hm
-import base_common.app_hooks as apphooks
 from base_common.dbaexc import ApplicationDbConfig
 from base_lookup import api_messages as amsgs
 from base_config.service import log
@@ -125,6 +124,7 @@ def app_api_method(**arguments):
         f_wrapper.__api_path__ = arguments['uri'] if 'uri' in arguments else ''
         f_wrapper.__api_return__ = arguments['api_return'] if 'api_return' in arguments else []
         f_wrapper.__api_return_type__ = arguments['return_type'] if 'return_type' in arguments else []
+        f_wrapper.__api_slave_call__ = arguments['slave'] if 'slave' in arguments else False
 
         return f_wrapper
 
@@ -174,16 +174,6 @@ def authenticated_call(*arguments):
 
                 if bool(dbuser.role&a):
                     _access = True
-
-            defined_arguments = False
-            if hasattr(apphooks, 'authenticated_callback'):
-                defined_arguments = apphooks.authenticated_callback(original_f.__name__, original_f.__module__)
-
-            if type(defined_arguments) is list and len(defined_arguments) != 0:
-                _access = False
-                for a in defined_arguments:
-                    if bool(dbuser.role&a):
-                        _access = True
 
             if not _access:
                 log.critical("Unauthorized user access attempt")
@@ -456,7 +446,7 @@ def get_current_datetime():
 
 def get_balanced_servers():
 
-    q = '''SELECT id, name, ip, created FROM balanced_servers WHERE active'''
+    q = '''SELECT id, name, ip, port, created FROM balanced_servers WHERE active'''
     _db = get_db()
     dbc = _db.cursor()
     try:
@@ -473,7 +463,27 @@ def get_balanced_servers():
     for sr in dbc.fetchall():
         servers[sr['id']] = {
             'name': sr['name'],
+            'ip': sr['ip'],
+            'port': sr['port'],
             'created': sr['created']
         }
 
     return servers
+
+
+def assign_server_to_user(id_user, id_server):
+
+    _db = get_db()
+    dbc = _db.cursor()
+    q = '''INSERT INTO users_server (id_user, id_server) VALUES ('{}', {})'''.format(id_user, id_server)
+
+    try:
+        dbc.execute(q)
+    except IntegrityError as e:
+        log.critical('Error assigning server {} to user {}: {}'.format(id_server, id_user, e))
+        return False
+
+    _db.commit()
+
+    return True
+

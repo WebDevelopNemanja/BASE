@@ -54,6 +54,9 @@ ERROR_POST_CHECK = 60
 ERROR_PACK_LOOKUPS = 61
 ERROR_ADD_SERVER = 62
 ERROR_GET_SERVER = 63
+INVALID_USER_DATA = 64
+WRONG_API_CALL = 65
+ERROR_ASSIGN_SERVER = 66
 
 msgs = {}
 msgs[EXCEPTION] = "Exception"
@@ -112,3 +115,6 @@ msgs[ERROR_POST_CHECK] = "Check post error"
 msgs[ERROR_PACK_LOOKUPS] = "Error pack lookups"
 msgs[ERROR_ADD_SERVER] = "Error save server"
 msgs[ERROR_GET_SERVER] = "Error get server"
+msgs[INVALID_USER_DATA] = "Ivalid user data"
+msgs[WRONG_API_CALL] = "Wrong call"
+msgs[ERROR_ASSIGN_SERVER] = "Error assign server"

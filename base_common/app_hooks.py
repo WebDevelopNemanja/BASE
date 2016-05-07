@@ -4,6 +4,9 @@ existing will be overloaded if needed
 
 format_password -- format password for new user (parameters: username, password)
 check_password -- check password is right (parameters: password from db, username, password)
+check_users_data_is_valid -- check data for user registration is valid (username, password, json users data)
+choose_balanced_server -- choose balanced server algorithm
+get_user_id -- get id for new user (username, password, json users data)
 check_password_is_valid -- validate given password (parameters: password) (user_register)
 post_register_digest -- post register users data processing
                         (parameters: users id, username, password, json users data) (user_register)
@@ -12,11 +15,22 @@ prepare_user_query -- prepare query for insert user in db
 pack_user_by_id -- get user from db by it's id (db connection, user id) (dbtokens)
 prepare_login_query -- prepare query for user login (parameters: username)
 post_login_digest -- post login processing (parameters: id_user, username, password(plain), login token)
-authenticated_callback -- return list of authenticated roles for given function name from given function module
 """
 
 import bcrypt
 from base_config.service import log
+from base_common.seq import sequencer
+from base_common.dbacommon import get_balanced_servers
+
+
+def choose_balanced_server():
+
+    _servers = get_balanced_servers()
+    import random
+    _chosen_id = random.choice([s_id for s_id in _servers])
+    _chosen = _servers[_chosen_id]
+    _chosen['id'] = _chosen_id
+    return _chosen
 
 
 def format_password(username, password):
@@ -29,6 +43,11 @@ def check_password(db_pwd, username, password):
     pwd = '{}{}'.format(username, password).encode('utf-8')
     dpwd = db_pwd.encode('utf-8')
     return dpwd == bcrypt.hashpw(pwd, dpwd)
+
+
+def get_user_id(username, password, user_data):
+
+    return sequencer().new('a')
 
 
 def prepare_user_query(u_id, username, password, *args, **kwargs):
