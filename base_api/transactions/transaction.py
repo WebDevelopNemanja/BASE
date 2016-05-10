@@ -15,7 +15,7 @@ from base_common.dbacommon import authenticated_call
 from base_common.dbacommon import get_db
 from base_common.dbacommon import params
 from base_common.seq import sequencer
-from base_common.transaction_common import get_currency_value
+from base_common.dbatransactions import get_currency_value
 from base_config.service import log
 
 name = "transaction"

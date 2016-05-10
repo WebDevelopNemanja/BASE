@@ -45,7 +45,7 @@ def check_password(db_pwd, username, password):
     return dpwd == bcrypt.hashpw(pwd, dpwd)
 
 
-def get_user_id(username, password, user_data):
+def get_user_id(username, password, user_data, **kwargs):
 
     return sequencer().new('a')
 
@@ -97,7 +97,6 @@ def pack_user_by_id(db, id_user, get_dict=False):
         log.critical('Fount {} auth_users with id {}'.format(dbc.rowcount, id_user))
         return False
 
-    #DUMMY CLASS INSTANCE USER JUST FOR EASIER MANIPULATION OF DATA
     class DBUser:
 
         def dump_user(self):

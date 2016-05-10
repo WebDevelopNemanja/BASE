@@ -11,7 +11,7 @@ from base_common.dbacommon import app_api_method
 from base_common.dbacommon import authenticated_call
 from base_common.dbacommon import get_db
 from base_common.dbacommon import params
-from base_common.transaction_common import update_currency_repo
+from base_common.dbatransactions import update_currency_repo
 from base_config.service import log
 
 name = "currencies"

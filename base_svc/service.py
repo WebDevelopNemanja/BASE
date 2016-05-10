@@ -56,8 +56,10 @@ def entry_point(api_path, api_module_map, allowed=None, denied=None):
 
     log.info("Registering {}".format(api_module.name))
 
+    base_pkg = hasattr(api_module, 'BASE') and api_module.BASE
     balance_excluded = hasattr(api_module, 'BALANCE_EXCLUDED') and api_module.BALANCE_EXCLUDED
-    _uri = "^/{}".format(api_path)
+
+    _uri = "^/{}{}".format("" if base_pkg else "{}/".format(api_module.PREFIX), api_path)
 
     return _uri, base_svc.comm.GeneralPostHandler, dict(allowed=allowed,
                                                         denied=denied,
@@ -102,6 +104,9 @@ def start_base_service():
         sys.exit(4)
 
     b_args = check_args(installed_apps)
+    if b_args.port:
+        import base_config.settings
+        base_config.settings.APP_PORT = b_args.port
 
     svc_port = b_args.port if b_args.port else installed_apps[b_args.app]['svc_port']
     check_test_port_is_used(svc_port, b_args.app)

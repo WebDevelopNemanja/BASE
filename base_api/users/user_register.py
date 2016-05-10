@@ -54,11 +54,11 @@ def register(username, password, users_data, **kwargs):
         return base_common.msg.error(msgs.INVALID_PASSWORD)
 
     if hasattr(apphooks, 'check_users_data_is_valid') and not \
-            apphooks.check_users_data_is_valid(username, password, users_data):
+            apphooks.check_users_data_is_valid(username, password, users_data, **kwargs):
         return base_common.msg.error(msgs.INVALID_USER_DATA)
 
     # 3. DOBIJANJE USER-ID-A
-    u_id, s_id = apphooks.get_user_id(username, password, users_data)
+    u_id, s_id = apphooks.get_user_id(username, password, users_data, **kwargs)
 
     if not u_id:
         return base_common.msg.error(msgs.ERROR_SERIALIZE_USER)

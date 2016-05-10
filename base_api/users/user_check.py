@@ -20,7 +20,7 @@ request_timeout = 10
     method='POST',
     api_return=[(200, 'OK'), (400, '')]
 )
-def do_post(**kwargs):
+def check(**kwargs):
     """
     Check if user is logged
     """
